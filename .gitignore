@@ -1,0 +1,14 @@
+# Build output
+backend/target/
+frontend/dist/
+frontend/.angular/
+frontend/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Secrets
+.env
+application-local.yml

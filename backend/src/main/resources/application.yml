@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+huggingface:
+  api:
+    # Set the HF_API_TOKEN environment variable, never commit a token.
+    # Needs an access token with the "Inference Providers" permission.
+    token: ${HF_API_TOKEN:}
+    base-url: https://router.huggingface.co/hf-inference/models
+    timeout-seconds: 90
+  model:
+    url: facebook/bart-large-cnn
+
+summarizer:
+  # BART reads about 1024 tokens, so documents are cut into pieces of this many characters.
+  chunk-size: 3000
+  max-chunks: 40

@@ -1,0 +1,98 @@
+<div class="container">
+  <header>
+    <h1>AI Document Summarizer</h1>
+    <p>Upload a PDF, Word or text file, or paste text, and get a concise summary you can download as a Word document</p>
+  </header>
+
+  <main>
+    <div class="mode-tabs">
+      <button type="button" class="tab" [class.active]="mode === 'document'" (click)="setMode('document')">Document</button>
+      <button type="button" class="tab" [class.active]="mode === 'text'" (click)="setMode('text')">Pasted text</button>
+    </div>
+
+    <div class="input-section">
+      <ng-container *ngIf="mode === 'document'">
+        <label
+          class="drop-zone"
+          [class.drag-over]="dragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)">
+          <input type="file" accept=".pdf,.docx,.txt" (change)="onFileSelected($event)" hidden>
+          <span class="drop-title">Drop a file here or click to choose</span>
+          <span class="drop-hint">PDF, DOCX or TXT, up to 10 MB</span>
+        </label>
+
+        <div *ngIf="selectedFile" class="file-chip">
+          <span class="file-name">{{ selectedFile.name }}</span>
+          <span class="file-size">{{ formatSize(selectedFile.size) }}</span>
+          <button type="button" class="chip-remove" title="Remove file" (click)="clearFile()">&times;</button>
+        </div>
+      </ng-container>
+
+      <textarea
+        *ngIf="mode === 'text'"
+        id="input-text"
+        [(ngModel)]="inputText"
+        placeholder="Paste your complex text here and watch it get distilled into pure insight..."></textarea>
+
+      <p *ngIf="errorMessage" class="error-message" role="alert">{{ errorMessage }}</p>
+
+      <button
+        id="summarize-btn"
+        (click)="generateSummary()"
+        [disabled]="isLoading">
+        {{ isLoading ? 'Processing...' : 'Generate Summary' }}
+      </button>
+    </div>
+
+    <div class="output-section" [class.loader-active]="isLoading">
+      <h2>Intelligent Summary</h2>
+      <p *ngIf="documentResult" class="meta">
+        {{ documentResult.fileName }}
+        <ng-container *ngIf="documentResult.pages"> · {{ documentResult.pages }} pages</ng-container>
+        · {{ documentResult.characters | number }} characters
+        <ng-container *ngIf="documentResult.sections > 1"> · {{ documentResult.sections }} sections</ng-container>
+      </p>
+      <div id="summary-output" class="summary-box">
+        <p *ngIf="!isSummaryAvailable" class="placeholder">
+          {{ summaryOutput }}
+        </p>
+        <div *ngIf="isSummaryAvailable" class="summary-content">
+          <p>{{ summaryOutput }}</p>
+          <button
+            id="copy-btn"
+            class="copy-btn"
+            title="Copy Summary"
+            (click)="copyToClipboard()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="documentResult && documentResult.sectionSummaries.length > 0" class="sections">
+        <details>
+          <summary>Summary by section ({{ documentResult.sectionSummaries.length }})</summary>
+          <ol>
+            <li *ngFor="let section of documentResult.sectionSummaries">{{ section }}</li>
+          </ol>
+        </details>
+      </div>
+
+      <div *ngIf="documentResult" class="download-row">
+        <button type="button" class="download-btn" (click)="downloadDocx()">Download as Word (.docx)</button>
+      </div>
+
+      <div *ngIf="isLoading" class="loader-container">
+        <div class="loader">
+          <div class="loader-dot"></div>
+          <div class="loader-dot"></div>
+          <div class="loader-dot"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
